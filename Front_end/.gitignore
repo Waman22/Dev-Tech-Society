@@ -1,0 +1,24 @@
+# Next.js / React / Node common ignores
+node_modules/
+.next/
+out/
+build/
+dist/
+.env
+.env.local
+.env.development.local
+npm-debug.log
+yarn-error.log
+*.log
+
+# Large binary / media files you don't want
+*.zip
+*.rar
+*.7z
+*.mp4
+*.mov
+*.avi
+*.pdf  # if huge
+*.exe
+*.msi
+*.dll   # if not needed in repo
