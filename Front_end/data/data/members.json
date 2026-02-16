@@ -1,0 +1,26 @@
+{
+  "group_1771057401277": [
+    {
+      "id": "member_1771057459363",
+      "name": "wamaanda phaswana",
+      "phone": "0714435438",
+      "email": "wamaphaswana@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-14T08:24:19.363Z"
+    },
+    {
+      "id": "member_1771057476533",
+      "name": "jji",
+      "phone": "0714435438",
+      "email": "wamaphaswana@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-14T08:24:36.533Z"
+    }
+  ]
+}

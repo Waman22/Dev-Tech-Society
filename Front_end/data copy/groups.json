@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "id": "group_1771057401277",
+      "name": "roselin",
+      "monthlyAmount": 300,
+      "dueDay": 25,
+      "description": "",
+      "reminderDays": 3,
+      "reminderTime": "10:00",
+      "smsTemplate": "default",
+      "customMessage": null,
+      "totalMembers": 2,
+      "totalCollected": 0,
+      "status": "active",
+      "createdAt": "2026-02-14T08:23:21.277Z",
+      "updatedAt": "2026-02-14T08:23:21.277Z"
+    }
+  ],
+  "lastId": 1
+}
