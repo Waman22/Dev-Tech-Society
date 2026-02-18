@@ -10,7 +10,7 @@ export default function Header() {
           <nav className="flex items-center">
             <Link
               href="/signin"
-              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition"
+              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors duration-200"
             >
               Admin Login
             </Link>

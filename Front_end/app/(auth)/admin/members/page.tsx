@@ -25,6 +25,7 @@ interface Member {
   paymentStatus: 'paid' | 'pending' | 'overdue';
   lastPaymentDate?: string;
   totalPaid: number;
+  createdAt: string;
 }
 
 export default function MembersPage() {
@@ -34,6 +35,8 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   
   // Form state for adding member
   const [formData, setFormData] = useState({
@@ -45,10 +48,12 @@ export default function MembersPage() {
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+  // Fetch all groups on page load
   useEffect(() => {
     fetchGroups();
   }, []);
 
+  // Fetch members when a group is selected
   useEffect(() => {
     if (selectedGroup) {
       fetchMembers(selectedGroup.id);
@@ -98,7 +103,7 @@ export default function MembersPage() {
     if (!formData.phone.trim()) {
       errors.phone = 'Phone number is required';
     } else if (!/^[0-9+\s]{10,15}$/.test(formData.phone.replace(/\s/g, ''))) {
-      errors.phone = 'Enter a valid phone number';
+      errors.phone = 'Enter a valid phone number (10-15 digits)';
     }
     
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
@@ -154,6 +159,7 @@ export default function MembersPage() {
         // Refresh members list
         fetchMembers(selectedGroup.id);
         
+        // Show success message
         alert('Member added successfully!');
       } else {
         alert(`Failed to add member: ${result.error || 'Unknown error'}`);
@@ -172,12 +178,47 @@ export default function MembersPage() {
         method: 'DELETE',
       });
       
-      if (response.ok && selectedGroup) {
-        fetchMembers(selectedGroup.id);
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        fetchMembers(selectedGroup!.id);
         alert('Member removed successfully');
+      } else {
+        alert(`Failed to remove member: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting member:', error);
+      alert('Failed to delete member');
+    }
+  };
+
+  const handleMarkAsPaid = async (memberId: string) => {
+    if (!selectedGroup) return;
+    
+    try {
+      const response = await fetch(`/api/auth/members/${memberId}/payments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: selectedGroup.monthlyAmount,
+          paymentMethod: 'cash',
+          paymentDate: new Date().toISOString()
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        fetchMembers(selectedGroup.id);
+        alert('Payment recorded successfully!');
+      } else {
+        alert(`Failed to record payment: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error recording payment:', error);
+      alert('Failed to record payment');
     }
   };
 
@@ -199,6 +240,14 @@ export default function MembersPage() {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const filteredMembers = members.filter(member => {
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.phone.includes(searchTerm) ||
+                         (member.email && member.email.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus = statusFilter === 'all' || member.paymentStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   if (loading) {
     return (
@@ -222,7 +271,7 @@ export default function MembersPage() {
             <h1 className="text-3xl font-bold text-gray-800">Members Management</h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Select a group to view and manage its members
+            Select a group to view, add, and manage members
           </p>
         </div>
 
@@ -299,9 +348,9 @@ export default function MembersPage() {
                     <div>
                       <h2 className="text-2xl font-bold text-white mb-2">{selectedGroup.name}</h2>
                       <div className="flex items-center space-x-4 text-blue-100">
-                        <span>💰 R{selectedGroup.monthlyAmount}/month</span>
-                        <span>📅 Due {selectedGroup.dueDay}{getDaySuffix(selectedGroup.dueDay)}</span>
-                        <span>👥 {selectedGroup.totalMembers} members</span>
+                        <span> R{selectedGroup.monthlyAmount}/month</span>
+                        <span> Due {selectedGroup.dueDay}{getDaySuffix(selectedGroup.dueDay)}</span>
+                        <span> {selectedGroup.totalMembers} members</span>
                       </div>
                     </div>
                     <button
@@ -323,6 +372,42 @@ export default function MembersPage() {
               </div>
             )}
 
+            {/* Search and Filter Bar */}
+            {selectedGroup && members.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 mb-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Search members by name, phone or email..."
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="all">All Status</option>
+                      <option value="paid">Paid</option>
+                      <option value="pending">Pending</option>
+                      <option value="overdue">Overdue</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Add Member Form Modal */}
             {showAddForm && selectedGroup && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -336,7 +421,9 @@ export default function MembersPage() {
                         onClick={() => setShowAddForm(false)}
                         className="text-gray-400 hover:text-gray-600"
                       >
-                        ✕
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
                     
@@ -462,6 +549,25 @@ export default function MembersPage() {
                       Add First Member
                     </button>
                   </div>
+                ) : filteredMembers.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <div className="inline-flex p-4 bg-gray-100 rounded-full mb-4">
+                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">No matching members</h3>
+                    <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria</p>
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setStatusFilter('all');
+                      }}
+                      className="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition shadow-lg"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
                 ) : (
                   <>
                     <div className="overflow-x-auto">
@@ -484,7 +590,7 @@ export default function MembersPage() {
                               Total Paid
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Last Payment
+                              Joined
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Actions
@@ -492,7 +598,7 @@ export default function MembersPage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {members.map((member) => (
+                          {filteredMembers.map((member) => (
                             <tr key={member.id} className="hover:bg-gray-50 transition">
                               <td className="px-6 py-4">
                                 <div className="flex items-center">
@@ -527,21 +633,35 @@ export default function MembersPage() {
                               </td>
                               <td className="px-6 py-4">
                                 <p className="text-sm text-gray-600">
-                                  {member.lastPaymentDate 
-                                    ? new Date(member.lastPaymentDate).toLocaleDateString()
-                                    : 'Never'}
+                                  {new Date(member.createdAt).toLocaleDateString()}
                                 </p>
                               </td>
                               <td className="px-6 py-4">
-                                <button
-                                  onClick={() => handleDeleteMember(member.id)}
-                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                                  title="Remove Member"
-                                >
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => handleMarkAsPaid(member.id)}
+                                    disabled={member.paymentStatus === 'paid'}
+                                    className={`p-2 rounded-lg transition ${
+                                      member.paymentStatus === 'paid'
+                                        ? 'text-gray-400 cursor-not-allowed'
+                                        : 'text-green-600 hover:bg-green-50'
+                                    }`}
+                                    title="Mark as Paid"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteMember(member.id)}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                    title="Remove Member"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -552,7 +672,8 @@ export default function MembersPage() {
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-600">
-                          Total <span className="font-medium text-gray-900">{members.length}</span> members in {selectedGroup.name}
+                          Showing <span className="font-medium text-gray-900">{filteredMembers.length}</span> of{' '}
+                          <span className="font-medium text-gray-900">{members.length}</span> members in {selectedGroup.name}
                         </p>
                         <button
                           onClick={() => setShowAddForm(true)}

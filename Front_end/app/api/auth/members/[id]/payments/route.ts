@@ -1,4 +1,4 @@
-// app/api/auth/members/[id]/route.ts
+// app/api/auth/members/[id]/payments/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
@@ -40,65 +40,100 @@ async function writeGroups(data: any) {
   }
 }
 
-export async function DELETE(
+// POST a payment for a member
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // AWAIT the params first!
     const { id } = await params;
-    console.log(`🗑️ DELETE /api/auth/members/${id} called`);
+    console.log(`💰 POST /api/auth/members/${id}/payments called`);
     
+    const body = await request.json();
+    console.log('Payment data:', body);
+    
+    // Validate
+    if (!body.amount || body.amount <= 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Valid amount is required'
+      }, { status: 400 });
+    }
+    
+    // Find the member
     const membersData = await readMembers();
-    let deletedMember = null;
-    let deletedGroupId = null;
+    let foundMember = null;
+    let foundGroupId = null;
     
-    // Find and delete member
     for (const groupId in membersData) {
-      const index = membersData[groupId].findIndex((m: any) => m.id === id);
-      if (index !== -1) {
-        deletedMember = membersData[groupId][index];
-        membersData[groupId].splice(index, 1);
-        deletedGroupId = groupId;
+      const memberIndex = membersData[groupId].findIndex((m: any) => m.id === id);
+      if (memberIndex !== -1) {
+        foundMember = membersData[groupId][memberIndex];
+        foundGroupId = groupId;
+        
+        // Update member payment status
+        const previousTotal = foundMember.totalPaid || 0;
+        foundMember.totalPaid = previousTotal + body.amount;
+        foundMember.paymentStatus = 'paid';
+        foundMember.lastPaymentDate = new Date().toISOString();
+        foundMember.updatedAt = new Date().toISOString();
+        
+        // Add payment to history
+        if (!foundMember.paymentHistory) {
+          foundMember.paymentHistory = [];
+        }
+        
+        foundMember.paymentHistory.push({
+          id: `payment_${Date.now()}`,
+          amount: body.amount,
+          method: body.paymentMethod || 'cash',
+          date: body.paymentDate || new Date().toISOString(),
+          recordedAt: new Date().toISOString()
+        });
+        
         break;
       }
     }
     
-    if (!deletedMember) {
+    if (!foundMember) {
       return NextResponse.json({
         success: false,
         error: 'Member not found'
       }, { status: 404 });
     }
     
-    // Save members
+    // Save members data
     await writeMembers(membersData);
     
-    // Update group member count
-    if (deletedGroupId) {
+    // Update group total collected
+    if (foundGroupId) {
       const groupsData = await readGroups();
-      const groupIndex = groupsData.groups.findIndex((g: any) => g.id === deletedGroupId);
+      const groupIndex = groupsData.groups.findIndex((g: any) => g.id === foundGroupId);
+      
       if (groupIndex !== -1) {
-        groupsData.groups[groupIndex].totalMembers = membersData[deletedGroupId]?.length || 0;
+        groupsData.groups[groupIndex].totalCollected = 
+          (groupsData.groups[groupIndex].totalCollected || 0) + body.amount;
         await writeGroups(groupsData);
       }
     }
     
     return NextResponse.json({
       success: true,
-      data: deletedMember,
-      message: 'Member deleted successfully'
+      data: foundMember,
+      message: 'Payment recorded successfully'
     });
     
   } catch (error) {
-    console.error('Error deleting member:', error);
+    console.error('Error recording payment:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to delete member'
+      error: 'Failed to record payment'
     }, { status: 500 });
   }
 }
 
+// GET payment history for a member
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -106,7 +141,7 @@ export async function GET(
   try {
     // AWAIT the params first!
     const { id } = await params;
-    console.log(`📋 GET /api/auth/members/${id} called`);
+    console.log(`📋 GET /api/auth/members/${id}/payments called`);
     
     const membersData = await readMembers();
     
@@ -115,8 +150,7 @@ export async function GET(
       if (member) {
         return NextResponse.json({
           success: true,
-          data: member,
-          groupId: groupId
+          data: member.paymentHistory || []
         });
       }
     }
@@ -127,10 +161,10 @@ export async function GET(
     }, { status: 404 });
     
   } catch (error) {
-    console.error('Error fetching member:', error);
+    console.error('Error fetching payment history:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch member'
+      error: 'Failed to fetch payment history'
     }, { status: 500 });
   }
 }

@@ -1,0 +1,53 @@
+{
+  "groups": [
+    {
+      "id": "group_1771235620378",
+      "name": "police",
+      "monthlyAmount": 900,
+      "dueDay": 25,
+      "description": "",
+      "reminderDays": 3,
+      "reminderTime": "10:00",
+      "smsTemplate": "default",
+      "customMessage": null,
+      "totalMembers": 2,
+      "totalCollected": 0,
+      "status": "active",
+      "createdAt": "2026-02-16T09:53:40.378Z",
+      "updatedAt": "2026-02-16T09:53:40.378Z"
+    },
+    {
+      "id": "group_1771332434088",
+      "name": "sugar",
+      "monthlyAmount": 400,
+      "dueDay": 25,
+      "description": "",
+      "reminderDays": 3,
+      "reminderTime": "10:00",
+      "smsTemplate": "friendly",
+      "customMessage": null,
+      "totalMembers": 1,
+      "totalCollected": 0,
+      "status": "active",
+      "createdAt": "2026-02-17T12:47:14.088Z",
+      "updatedAt": "2026-02-17T12:47:14.088Z"
+    },
+    {
+      "id": "group_1771421020984",
+      "name": "sanitery family",
+      "monthlyAmount": 800,
+      "dueDay": 12,
+      "description": "",
+      "reminderDays": 2,
+      "reminderTime": "07:00",
+      "smsTemplate": "default",
+      "customMessage": null,
+      "totalMembers": 2,
+      "totalCollected": 0,
+      "status": "active",
+      "createdAt": "2026-02-18T13:23:40.984Z",
+      "updatedAt": "2026-02-18T13:23:40.984Z"
+    }
+  ],
+  "lastId": 3
+}

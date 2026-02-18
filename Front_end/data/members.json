@@ -1,0 +1,68 @@
+{
+  "group_1771235620378": [
+    {
+      "id": "member_1771333093643_lkdipllf3",
+      "name": "wamaanda phaswana",
+      "phone": "0714435438",
+      "email": "wamaphaswana@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-17T12:58:13.643Z",
+      "updatedAt": "2026-02-17T12:58:13.643Z"
+    },
+    {
+      "id": "member_1771421093064_v8lgkcfbf",
+      "name": "walter white",
+      "phone": "08244623495",
+      "email": "whitea@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-18T13:24:53.064Z",
+      "updatedAt": "2026-02-18T13:24:53.064Z"
+    }
+  ],
+  "group_1771332434088": [
+    {
+      "id": "member_1771333176888_dzhjbzqfh",
+      "name": "Wama Phaswana",
+      "phone": "0714435438",
+      "email": "wamaphaswana@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-17T12:59:36.888Z",
+      "updatedAt": "2026-02-17T12:59:36.888Z"
+    }
+  ],
+  "group_1771421020984": [
+    {
+      "id": "member_1771422680740_gdew14kz8",
+      "name": "point ",
+      "phone": "0714435488",
+      "email": "wamaphaswana@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-18T13:51:20.740Z",
+      "updatedAt": "2026-02-18T13:51:20.740Z"
+    },
+    {
+      "id": "member_1771422711580_91fq5hnig",
+      "name": "self doing",
+      "phone": "0794435438",
+      "email": "wamaphaswana@gmail.com",
+      "idNumber": "",
+      "paymentStatus": "pending",
+      "totalPaid": 0,
+      "lastPaymentDate": null,
+      "createdAt": "2026-02-18T13:51:51.580Z",
+      "updatedAt": "2026-02-18T13:51:51.580Z"
+    }
+  ]
+}

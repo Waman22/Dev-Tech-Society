@@ -248,9 +248,9 @@ export default function PaymentsPage() {
     };
     
     const icons = {
-      paid: '✓',
-      pending: '⏳',
-      overdue: '⚠️'
+      paid: '',
+      pending: '',
+      overdue: ''
     };
     
     return (
@@ -666,23 +666,7 @@ export default function PaymentsPage() {
                 Showing <span className="font-medium">{filteredPayments.length}</span> of{' '}
                 <span className="font-medium">{payments.length}</span> payments
               </p>
-              <div className="flex space-x-2">
-                <button className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-                  Previous
-                </button>
-                <button className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-                  1
-                </button>
-                <button className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-                  2
-                </button>
-                <button className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-                  3
-                </button>
-                <button className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-                  Next
-                </button>
-              </div>
+            
             </div>
           </div>
         </div>
